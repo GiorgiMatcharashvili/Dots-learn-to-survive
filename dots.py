@@ -16,8 +16,8 @@ class Dot:
 
         self.draw()
 
-    def move(self, positions, bad_points):
-        direction = self.get_direction(positions + bad_points)
+    def move(self, positions, bad_points, good_points):
+        direction = self.get_direction(positions + bad_points, good_points)
         new_position = (self.position[0] + direction[0], self.position[1] + direction[1])
 
         self.last_position = self.position
@@ -33,38 +33,54 @@ class Dot:
     def draw(self):
         pygame.draw.circle(self.surface, self.color, self.position, self.radius)
 
-    def get_direction(self, positions):
+    def get_direction(self, bad_points, good_points):
         directions = [(0, 1), (1, 0), (1, 1), (0, -1), (-1, 0), (-1, -1), (-1, 1), (1, -1)]
 
-        # Find the closest dot or deadly point
-        shortest_distance = 501
-        closest_position = None
-        for position in positions:
-            distance = math.dist(self.position, position)
-            if distance < shortest_distance:
-                shortest_distance = distance
-                closest_position = position
-
-        # Take out the direction to last position
         if self.last_position:
             direction_to_last = (self.last_position[0] - self.position[0], self.last_position[1] - self.position[1])
-            if direction_to_last in directions:
-                directions.remove(direction_to_last)
+            directions.remove(direction_to_last)
 
-        # Calculate the best direction
-        if shortest_distance != 0:
-            longest_distance = 0
-            best_direction = None
-            for direction in directions:
-                new_position = (self.position[0] + direction[0], self.position[1] + direction[1])
-                distance = math.dist(new_position, closest_position)
-                if distance > longest_distance:
-                    longest_distance = distance
-                    best_direction = direction
+        worst_bad, best_bed = self.analise_bad_points(bad_points, directions)
+        worst_good, best_good = self.analise_good_points(good_points, directions)
 
-            return best_direction
+        # TODO create logic for choosing the best direction
 
-        return random.choice(directions)
+    def analise_bad_points(self, bad_points, directions):
+        # Find the closest bad point
+        points_lst = [(bad_point, math.dist(self.position, bad_point)) for bad_point in bad_points]
+        point, distance = sorted(points_lst, key=lambda l: l[1])[0]
+
+        # Find the worst and the best directions
+        data = [(d, math.dist((self.position[0] + d[0], self.position[1] + d[1]), point)) for d in directions]
+        sorted_data = sorted(data, key=lambda l: l[1])
+
+        if distance == 0:
+            return random.choice(sorted_data[:4]), random.choice(sorted_data[4:])
+
+        # First one is the worst direction
+        # Second one is the best direction
+        return sorted_data[0], sorted_data[-1]
+
+    def analise_good_points(self, good_points, directions):
+        if not good_points:
+            return False, False
+
+        good_points = [(good_point[0], good_point[1]) for good_point in good_points]
+
+        # Find the closest good point
+        points_lst = [(good_point, math.dist(self.position, good_point)) for good_point in good_points]
+        point, distance = sorted(points_lst, key=lambda l: l[1])[0]
+
+        # Find the worst and the best directions
+        data = [(d, math.dist((self.position[0] + d[0], self.position[1] + d[1]), point)) for d in directions]
+        sorted_data = sorted(data, key=lambda l: l[1], reverse=True)
+
+        if distance == 0:
+            return random.choice(sorted_data[:4]), random.choice(sorted_data[4:])
+
+        # First one is the worst direction
+        # Second one is the best direction
+        return sorted_data[0], sorted_data[-1]
 
 
 class Dots:
@@ -89,7 +105,7 @@ class Dots:
             for obj1 in self.objs:
                 if obj != obj1:
                     positions.append(obj1.position)
-            obj.move(positions, self.bad_points)
+            obj.move(positions, self.bad_points, self.good_points)
 
         self.check()
 
@@ -120,12 +136,13 @@ class Dots:
         good_points = []
         current_population = len(self.objs)
 
-        good_points_amount = int(current_population/10)
+        good_points_amount = int(current_population / 10)
 
         for obj in self.objs:
             pos = obj.position
 
-            border_points = [(self.game.resolution[0], pos[1]), (pos[0], self.game.resolution[1]), (self.game.resolution[0], pos[1]), (pos[1], self.game.resolution[1])]
+            border_points = [(self.game.resolution[0], pos[1]), (pos[0], self.game.resolution[1]),
+                             (self.game.resolution[0], pos[1]), (pos[1], self.game.resolution[1])]
             closest_to_border = min([math.dist(pos, each) for each in border_points])
 
             if len(good_points) < good_points_amount:
