@@ -127,19 +127,18 @@ class Dots:
 
             border_points = [(self.game.resolution[0], pos[1]), (pos[0], self.game.resolution[1]), (self.game.resolution[0], pos[1]), (pos[1], self.game.resolution[1])]
             closest_to_border = min([math.dist(pos, each) for each in border_points])
-            print(closest_to_border)
 
             if len(good_points) < good_points_amount:
-                good_points.append([pos, closest_to_border])
+                good_points.append((*pos, closest_to_border))
                 continue
 
             for each in sorted(good_points, key=lambda l: l[1], reverse=True):
                 if closest_to_border < each[1]:
                     good_points.remove(each)
-                    good_points.append([pos, closest_to_border])
+                    good_points.append((*pos, closest_to_border))
                     break
-        print(good_points)
-        return good_points
+
+        self.good_points += good_points
 
     def save_data(self):
         with open("data.json", "r+") as f:
@@ -150,7 +149,8 @@ class Dots:
                 data[str(self.default_population)]["bad_points"] = list(set(self.bad_points))
 
                 # Add good points
-                data[str(self.default_population)]["good_points"] = list(set(self.calculate_good_points()))
+                self.calculate_good_points()
+                data[str(self.default_population)]["good_points"] = list(set(self.good_points))
             except KeyError:
                 data[self.default_population] = {"bad_points": self.bad_points,
                                                  "good_points": self.calculate_good_points()}
@@ -164,6 +164,10 @@ class Dots:
             data = json.load(f)
             try:
                 self.bad_points = data[str(self.default_population)]["bad_points"]
+                self.bad_points = [tuple(point) for point in self.bad_points]
+
                 self.good_points = data[str(self.default_population)]["good_points"]
+                self.good_points = [tuple(point) for point in self.good_points]
+
             except KeyError:
                 pass
