@@ -27,3 +27,12 @@ class Game:
         textRect.center = (72, 10)
         textRect.normalize()
         self.surface.blit(text, textRect)
+
+    def draw_good_dots(self, dots):
+        dots = [(dot[0], dot[1]) for dot in dots]
+        for dot in dots:
+            pygame.draw.circle(self.surface, "#00FF00", dot, 5)
+
+    def draw_bad_dots(self, dots):
+        for dot in dots:
+            pygame.draw.circle(self.surface, "#FF0000", dot, 5)

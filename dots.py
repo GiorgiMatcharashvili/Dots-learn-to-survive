@@ -40,10 +40,19 @@ class Dot:
             direction_to_last = (self.last_position[0] - self.position[0], self.last_position[1] - self.position[1])
             directions.remove(direction_to_last)
 
-        worst_bad, best_bed = self.analise_bad_points(bad_points, directions)
+        worst_bad, best_bad = self.analise_bad_points(bad_points, directions)
         worst_good, best_good = self.analise_good_points(good_points, directions)
 
-        # TODO create logic for choosing the best direction
+        if worst_good and best_good:
+            if worst_bad[0] != best_good[0]:
+                return best_good[0]
+            else:
+                if best_good[1] < worst_bad[1]:
+                    return best_good[0]
+                else:
+                    return best_bad[0]
+        else:
+            return best_bad[0]
 
     def analise_bad_points(self, bad_points, directions):
         # Find the closest bad point

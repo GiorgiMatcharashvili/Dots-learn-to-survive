@@ -28,6 +28,10 @@ def run():
 
         game.clear()
 
+        # Draw good and bad dots
+        game.draw_good_dots(dots.good_points)
+        game.draw_bad_dots(dots.bad_points)
+
         # Move dots
         dots.move()
 
