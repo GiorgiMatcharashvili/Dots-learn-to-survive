@@ -1,23 +1,12 @@
-import random
 import time
-
 import pygame
-from game import Game
+from board import Board
 from dots import Dots
-
-SETTINGS = {
-    "name": "Dots learn to Survive",
-    "resolution": (500, 500),
-    "bck_color": "#ffffff",
-    "population": 40,
-    "start_position": (250, 250),
-    "dot_color": "#000000",
-}
 
 
 def run():
-    game = Game(SETTINGS["name"], SETTINGS["resolution"], SETTINGS["bck_color"])
-    dots = Dots(SETTINGS["population"], SETTINGS["start_position"], SETTINGS["dot_color"], game)
+    board = Board()
+    dots = Dots(board)
 
     is_running = True
 
@@ -26,13 +15,12 @@ def run():
             if event.type == pygame.QUIT:
                 is_running = False
 
-        game.clear()
+        board.clear()
 
-        # Draw good and bad dots
-        game.draw_good_dots(dots.good_points)
-        game.draw_bad_dots(dots.bad_points)
+        board.show_points(dots.good_points + dots.bad_points)
 
-        # Move dots
+        board.show_points(dots.objs)
+
         dots.move()
 
         pygame.display.update()
