@@ -61,20 +61,15 @@ class Dots(Base):
         good_points_amount = int(current_population / 10)
 
         for obj in self.objs:
-            pos = obj.pos
-
-            border_points = [(self.RESOLUTION[0], pos[1]), (pos[0], self.RESOLUTION[1]),
-                             (self.RESOLUTION[0], pos[1]), (pos[1], self.RESOLUTION[1])]
-            closest_to_border = min([math.dist(pos, each) for each in border_points])
-
             if len(good_points) < good_points_amount:
-                good_points.append(Point(*pos, 1))
+                good_points.append(Point(*obj.pos, 1))
                 continue
 
-            for each in sorted(good_points, key=lambda l: l.dist_to_border, reverse=True):
-                if closest_to_border < each.dist_to_border:
+            sorted_data = sorted(good_points, key=lambda l: l.dist_to_border)
+            for each in sorted_data:
+                if obj.dist_to_border < each.dist_to_border:
                     good_points.remove(each)
-                    good_points.append(Point(*pos, 1))
+                    good_points.append(Point(*obj.pos, 1))
                     break
 
         self.good_points += good_points
