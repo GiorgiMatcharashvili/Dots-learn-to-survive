@@ -9,9 +9,6 @@ class Dot(Point):
 
         self.last_pos = None
 
-        self.board_ranges = (range(int(-1 * (self.RESOLUTION[0] / 2)), int((self.RESOLUTION[0] / 2) + 1)),
-                             range(int(-1 * (self.RESOLUTION[1] / 2)), int((self.RESOLUTION[1] / 2) + 1)))
-
     def get_new_pos(self, direction: tuple):
         """ Generates new position using direction """
         return self.pos[0] + direction[0], self.pos[1] + direction[1]
@@ -26,7 +23,7 @@ class Dot(Point):
 
     def is_dead(self):
         """ Checks if dot is dead """
-        if self.pos[0] in self.board_ranges[0] and self.pos[1] in self.board_ranges[1]:
+        if self.pos[0] in self.border[0] and self.pos[1] in self.border[1]:
             return False
         return True
 

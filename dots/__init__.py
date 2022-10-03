@@ -68,13 +68,13 @@ class Dots(Base):
             closest_to_border = min([math.dist(pos, each) for each in border_points])
 
             if len(good_points) < good_points_amount:
-                good_points.append(Point(*pos, 1, border_distance=closest_to_border))
+                good_points.append(Point(*pos, 1))
                 continue
 
-            for each in sorted(good_points, key=lambda l: l.border_distance, reverse=True):
-                if closest_to_border < each.border_distance:
+            for each in sorted(good_points, key=lambda l: l.dist_to_border, reverse=True):
+                if closest_to_border < each.dist_to_border:
                     good_points.remove(each)
-                    good_points.append(Point(*pos, 1, border_distance=closest_to_border))
+                    good_points.append(Point(*pos, 1))
                     break
 
         self.good_points += good_points

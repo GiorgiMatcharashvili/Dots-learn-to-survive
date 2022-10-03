@@ -1,11 +1,11 @@
+import math
 from board import Base
 
 
 class Point(Base):
-    def __init__(self, x: int, y: int, status: int, border_distance: float = None):
+    def __init__(self, x: int, y: int, status: int):
         self.pos = (x, y)
         self.status = status
-        self.border_distance = border_distance
 
         if status == -1:
             # Bad point
@@ -21,3 +21,11 @@ class Point(Base):
             # Good point
             self.radius = 5
             self.color = self.GREEN
+
+    @property
+    def dist_to_border(self):
+        border_points = [(self.RESOLUTION[0] / 2, self.pos[1]), (self.pos[0], self.RESOLUTION[1] / 2),
+                         (self.RESOLUTION[0] / 2, self.pos[1]), (self.pos[1], self.RESOLUTION[1] / 2)]
+        closest_to_border = min([math.dist(self.pos, each) for each in border_points])
+
+        return closest_to_border

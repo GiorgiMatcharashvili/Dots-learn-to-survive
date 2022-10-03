@@ -12,6 +12,11 @@ class Base:
     GREEN = "#00FF00"
     RED = "#FF0000"
 
+    @property
+    def border(self):
+        return (range(int(-1 * (self.RESOLUTION[0] / 2)), int((self.RESOLUTION[0] / 2) + 1)),
+                range(int(-1 * (self.RESOLUTION[1] / 2)), int((self.RESOLUTION[1] / 2) + 1)))
+
 
 class Board(Base):
     def __init__(self):
