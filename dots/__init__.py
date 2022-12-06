@@ -40,7 +40,8 @@ class Dots(Base):
                 self.death_time = dt.now()
 
         # show population
-        self.board.show_text("Population: " + str(len(self.objs)), (-1 * self.RESOLUTION[0]/2, self.RESOLUTION[0]/2))
+        self.board.show_text("Population: " + str(len(self.objs)),
+                             (-1 * self.RESOLUTION[0] / 2, self.RESOLUTION[0] / 2))
 
         # Check if they should regenerate
         if self.death_time:
@@ -55,24 +56,23 @@ class Dots(Base):
         self.death_time = dt.now()
 
     def calculate_good_points(self):
-        good_points = []
         current_population = len(self.objs)
 
         good_points_amount = int(current_population / 10)
 
-        for obj in self.objs:
-            if len(good_points) < good_points_amount:
-                good_points.append(Point(*obj.pos, 1))
-                continue
+        good_points = sorted(self.objs, key=self.sort_key_func)[:good_points_amount]
+        for good_point in good_points:
+            self.good_points.append(Point(*good_point.pos, 1))
 
-            sorted_data = sorted(good_points, key=lambda l: l.dist_to_border)
-            for each in sorted_data:
-                if obj.dist_to_border < each.dist_to_border:
-                    good_points.remove(each)
-                    good_points.append(Point(*obj.pos, 1))
-                    break
+    def sort_key_func(self, element):
+        for good_point in self.good_points:
+            if math.dist(good_point.pos, element.pos) < 25:
+                if element.dist_to_border <= good_point.dist_to_border:
+                    self.good_points.remove(good_point)
+                    return element.dist_to_border
+                return 1000
 
-        self.good_points += good_points
+        return element.dist_to_border
 
     def save_data(self):
         with open("./data.json", "r+") as f:
@@ -80,11 +80,11 @@ class Dots(Base):
 
             try:
                 # Add bad points
-                data[str(self.POPULATION)]["bad_points"] = list(set([bad_point.pos for bad_point in self.bad_points]))
+                data[str(self.POPULATION)]["bad_points"] = list({bad_point.pos for bad_point in self.bad_points})
 
                 # Add good points
                 self.calculate_good_points()
-                data[str(self.POPULATION)]["good_points"] = list(set([good_point.pos for good_point in self.good_points]))
+                data[str(self.POPULATION)]["good_points"] = list({good_point.pos for good_point in self.good_points})
 
             except KeyError:
                 # Add good points
