@@ -24,11 +24,12 @@ class Point(Base):
 
     @property
     def dist_to_border(self):
-        '''
+        """
         :return: returns the closest distance from the point to border
-        '''
+        """
         border_points = [(self.RESOLUTION[0] / 2, self.pos[1]), (self.pos[0], self.RESOLUTION[1] / 2),
                          (self.RESOLUTION[0] / 2, self.pos[1]), (self.pos[1], self.RESOLUTION[1] / 2)]
         closest_to_border = min([math.dist(self.pos, each) for each in border_points])
 
         return closest_to_border
+

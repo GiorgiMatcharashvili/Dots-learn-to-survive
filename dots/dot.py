@@ -31,10 +31,15 @@ class Dot(Point):
         """ Sends the best possible direction """
         directions = [(0, 1), (1, 0), (1, 1), (0, -1), (-1, 0), (-1, -1), (-1, 1), (1, -1)]
 
+        # Don't go to the last position
         if self.last_pos:
             direction_to_last = (self.last_pos[0] - self.pos[0], self.last_pos[1] - self.pos[1])
             directions.remove(direction_to_last)
 
+        # Don't go if there is too many dots
+
+
+        # Find worst and best directions to go
         worst_bad, best_bad = self.analise_bad_points(bad_points, directions)
         worst_good, best_good = self.analise_good_points(good_points, directions)
 

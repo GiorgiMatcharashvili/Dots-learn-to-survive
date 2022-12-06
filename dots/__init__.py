@@ -21,13 +21,22 @@ class Dots(Base):
         self.objs = [Dot(*self.start_pos) for _ in range(self.POPULATION)]
 
     def move(self):
+        # Find all occupied good points
+        occupied_points = []
+        for good_point in self.good_points:
+            for obj in self.objs:
+                dist = math.dist(good_point.pos, obj.pos)
+                if dist < 5:
+                    occupied_points.append(good_point)
+                    break
+
         # Move all the dots
         for obj in self.objs:
             positions = []
-            for obj1 in self.objs:
-                if obj != obj1:
-                    positions.append(Point(*obj1.pos, 1))
-            obj.move(positions, self.bad_points, self.good_points)
+            for diff_obj in self.objs:
+                if obj != diff_obj:
+                    positions.append(Point(*diff_obj.pos, 1))
+            obj.move(positions, self.bad_points, list(set(self.good_points) - set(occupied_points)))
 
         self.check()
 
@@ -39,14 +48,18 @@ class Dots(Base):
                 self.objs.remove(obj)
                 self.death_time = dt.now()
 
+        population = len(self.objs)
+
         # show population
-        self.board.show_text("Population: " + str(len(self.objs)),
+        self.board.show_text("Population: " + str(population),
                              (-1 * self.RESOLUTION[0] / 2, self.RESOLUTION[0] / 2))
 
         # Check if they should regenerate
+        time_limit = 20 if population == self.POPULATION else 10
+
         if self.death_time:
             time_dilation = dt.now() - self.death_time
-            if float(time_dilation.total_seconds()) > 10:
+            if float(time_dilation.total_seconds()) > time_limit:
                 self.regeneration()
 
     def regeneration(self):
