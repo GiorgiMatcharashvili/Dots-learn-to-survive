@@ -12,10 +12,14 @@ class Base:
     GREEN = "#00FF00"
     RED = "#FF0000"
 
-    @property
-    def border(self):
-        return (range(int(-1 * (self.RESOLUTION[0] / 2)), int((self.RESOLUTION[0] / 2) + 1)),
-                range(int(-1 * (self.RESOLUTION[1] / 2)), int((self.RESOLUTION[1] / 2) + 1)))
+    # Fine Distance between dots
+    FINE_DIST = (2 * RESOLUTION[0] + 2 * RESOLUTION[1]) / POPULATION
+
+    BORDER = (range(int(-1 * (RESOLUTION[0] / 2)), int((RESOLUTION[0] / 2) + 1)),
+              range(int(-1 * (RESOLUTION[1] / 2)), int((RESOLUTION[1] / 2) + 1)))
+
+    # This will define from which element it should start making good points
+    GP_INDEX = 1
 
 
 class Board(Base):
@@ -51,7 +55,7 @@ class Board(Base):
         text = font.render(text, True, self.BLACK)
         textRect = text.get_rect()
 
-        textRect.centerx = self.translate(*pos)[0] + textRect.size[0]/2
+        textRect.centerx = self.translate(*pos)[0] + textRect.size[0] / 2
         textRect.normalize()
         self.surface.blit(text, textRect)
 

@@ -4,6 +4,7 @@ from datetime import datetime as dt
 from .dot import Dot
 from board import Base
 from .point import Point
+from itertools import product
 
 
 class Dots(Base):
@@ -26,8 +27,9 @@ class Dots(Base):
         for good_point in self.good_points:
             for obj in self.objs:
                 dist = math.dist(good_point.pos, obj.pos)
-                if dist < 5:
+                if dist < 3:
                     occupied_points.append(good_point)
+                    obj.winner = True
                     break
 
         # Move all the dots
@@ -55,7 +57,7 @@ class Dots(Base):
                              (-1 * self.RESOLUTION[0] / 2, self.RESOLUTION[0] / 2))
 
         # Check if they should regenerate
-        time_limit = 20 if population == self.POPULATION else 10
+        time_limit = 10 if len(self.good_points) < 20 else len(self.good_points) * 50 / 100
 
         if self.death_time:
             time_dilation = dt.now() - self.death_time
@@ -69,26 +71,42 @@ class Dots(Base):
         self.death_time = dt.now()
 
     def calculate_good_points(self):
-        current_population = len(self.objs)
+        # Find objs worthy to become good points
+        loser_objs = []
+        for obj in self.objs:
+            if not obj.winner:
+                loser_objs.append(obj)
 
-        good_points_amount = int(current_population / 10)
+        sorted_objs = sorted(loser_objs, key=lambda l: l.dist_to_border)
+        worthy_objs = []
+        for each in sorted_objs:
+            if each.dist_to_border in range(int(sorted_objs[0].dist_to_border),
+                                            int(sorted_objs[self.GP_INDEX].dist_to_border + self.FINE_DIST)):
+                worthy_objs.append(each)
+            else:
+                break
 
-        good_points = sorted(self.objs, key=self.sort_key_func)[:good_points_amount]
-        for good_point in good_points:
-            self.good_points.append(Point(*good_point.pos, 1))
+        # Check worthy objs
+        not_good_points = set()
+        not_worthy_objs = set()
+        for i in list(product(worthy_objs, self.good_points)):
+            obj, good_point = i[0], i[1]
+            if math.dist(obj.pos, good_point.pos) <= self.FINE_DIST:
+                if obj.dist_to_border > good_point.dist_to_border:
+                    not_worthy_objs.add(obj)
+                elif good_point.dist_to_border >= obj.dist_to_border:
+                    not_good_points.add(good_point)
 
-    def sort_key_func(self, element):
-        for good_point in self.good_points:
-            if math.dist(good_point.pos, element.pos) < 25:
-                if element.dist_to_border <= good_point.dist_to_border:
-                    self.good_points.remove(good_point)
-                    return element.dist_to_border
-                return 1000
+        self.good_points = list(set(self.good_points) - not_good_points)
+        worthy_objs = list(set(worthy_objs) - not_worthy_objs)
 
-        return element.dist_to_border
+        for obj in worthy_objs:
+            self.good_points.append(Point(*obj.pos, 1))
+
+        print(len(self.good_points))
 
     def save_data(self):
-        with open("./data.json", "r+") as f:
+        with open("./data.json", "r") as f:
             data = json.load(f)
 
             try:
@@ -105,9 +123,11 @@ class Dots(Base):
                 data[self.POPULATION] = {"bad_points": [bad_point.pos for bad_point in self.bad_points],
                                          "good_points": [good_point.pos for good_point in self.good_points]}
 
-            f.seek(0)
-
-            json.dump(data, f, indent=4)
+        try:
+            with open("./data.json", "w") as f:
+                json.dump(data, f, indent=4)
+        except Exception as e:
+            print(e)
 
     def load_data(self):
         with open("./data.json", "r+") as f:

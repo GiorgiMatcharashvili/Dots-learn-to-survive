@@ -7,6 +7,7 @@ class Dot(Point):
     def __init__(self, x: int, y: int):
         super().__init__(x, y, 0)
 
+        self.winner = False
         self.last_pos = None
 
     def get_new_pos(self, direction: tuple):
@@ -23,21 +24,21 @@ class Dot(Point):
 
     def is_dead(self):
         """ Checks if dot is dead """
-        if self.pos[0] in self.border[0] and self.pos[1] in self.border[1]:
+        if self.pos[0] in self.BORDER[0] and self.pos[1] in self.BORDER[1]:
             return False
         return True
 
     def get_direction(self, bad_points: list, good_points: list):
         """ Sends the best possible direction """
+        if self.winner:
+            return 0, 0
+
         directions = [(0, 1), (1, 0), (1, 1), (0, -1), (-1, 0), (-1, -1), (-1, 1), (1, -1)]
 
         # Don't go to the last position
         if self.last_pos:
             direction_to_last = (self.last_pos[0] - self.pos[0], self.last_pos[1] - self.pos[1])
             directions.remove(direction_to_last)
-
-        # Don't go if there is too many dots
-
 
         # Find worst and best directions to go
         worst_bad, best_bad = self.analise_bad_points(bad_points, directions)

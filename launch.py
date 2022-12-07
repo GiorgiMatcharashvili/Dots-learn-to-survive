@@ -1,4 +1,3 @@
-import time
 import pygame
 from board import Board
 from dots import Dots
@@ -24,7 +23,6 @@ def run():
         dots.move()
 
         pygame.display.update()
-        time.sleep(0.01)
 
 
 if __name__ == "__main__":
