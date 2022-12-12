@@ -9,6 +9,7 @@ from itertools import product
 
 class Dots(Base):
     def __init__(self, board: Board):
+        self.generation = 0
         self.start_pos = (0, 0)
 
         self.bad_points = []
@@ -57,7 +58,7 @@ class Dots(Base):
                              (-1 * self.RESOLUTION[0] / 2, self.RESOLUTION[0] / 2))
 
         # Check if they should regenerate
-        time_limit = 10 if len(self.good_points) < 20 else len(self.good_points) * 50 / 100
+        time_limit = 10 if len(self.good_points) < 20 else len(self.good_points) / 2
 
         if self.death_time:
             time_dilation = dt.now() - self.death_time
@@ -65,9 +66,15 @@ class Dots(Base):
                 self.regeneration()
 
     def regeneration(self):
+        self.generation += 1
         self.save_data()
-        self.objs = [Dot(*self.start_pos) for _ in range(self.POPULATION)]
 
+        print(f"GENERATION: {self.generation}")
+        print(f"TIME: {(dt.now() - self.death_time).total_seconds()}")
+        print(f"POPULATION: {len(self.objs)}")
+        print(f"Good points count: {len(self.good_points)}, Bad points count: {len(self.bad_points)}\n")
+
+        self.objs = [Dot(*self.start_pos) for _ in range(self.POPULATION)]
         self.death_time = dt.now()
 
     def calculate_good_points(self):
@@ -102,8 +109,6 @@ class Dots(Base):
 
         for obj in worthy_objs:
             self.good_points.append(Point(*obj.pos, 1))
-
-        print(len(self.good_points))
 
     def save_data(self):
         with open("./data.json", "r") as f:
