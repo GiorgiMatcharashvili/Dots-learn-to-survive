@@ -2,13 +2,13 @@ import json
 import math
 from datetime import datetime as dt
 from .dot import Dot
-from board import Base
+from board import Base, Board
 from .point import Point
 from itertools import product
 
 
 class Dots(Base):
-    def __init__(self, board):
+    def __init__(self, board: Board):
         self.start_pos = (0, 0)
 
         self.bad_points = []
@@ -123,11 +123,8 @@ class Dots(Base):
                 data[self.POPULATION] = {"bad_points": [bad_point.pos for bad_point in self.bad_points],
                                          "good_points": [good_point.pos for good_point in self.good_points]}
 
-        try:
-            with open("./data.json", "w") as f:
-                json.dump(data, f, indent=4)
-        except Exception as e:
-            print(e)
+        with open("./data.json", "w") as f:
+            json.dump(data, f, indent=4)
 
     def load_data(self):
         with open("./data.json", "r+") as f:
