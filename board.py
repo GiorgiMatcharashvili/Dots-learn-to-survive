@@ -19,7 +19,7 @@ class Base:
               range(int(-1 * (RESOLUTION[1] / 2)), int((RESOLUTION[1] / 2) + 1)))
 
     # This will define from which element it should start making good points
-    GP_INDEX = 1
+    GP_INDEX = 3
 
 
 class Board(Base):

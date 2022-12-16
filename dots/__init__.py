@@ -41,7 +41,7 @@ class Dots(Base):
                     positions.append(Point(*diff_obj.pos, 1))
             obj.move(positions, self.bad_points, list(set(self.good_points) - set(occupied_points)))
 
-        self.check()
+        return self.check()
 
     def check(self):
         # Check if they are alive
@@ -50,6 +50,9 @@ class Dots(Base):
                 self.bad_points.append(Point(*obj.pos, -1))
                 self.objs.remove(obj)
                 self.death_time = dt.now()
+
+        if not self.death_time:
+            self.death_time = dt.now()
 
         population = len(self.objs)
 
@@ -60,30 +63,37 @@ class Dots(Base):
         # Check if they should regenerate
         time_limit = 10 if len(self.good_points) < 20 else len(self.good_points) / 2
 
-        if self.death_time:
-            time_dilation = dt.now() - self.death_time
-            if float(time_dilation.total_seconds()) > time_limit:
-                self.regeneration()
+        time_dilation = dt.now() - self.death_time
+        if float(time_dilation.total_seconds()) > time_limit:
+            self.regeneration()
+
+        # Check if it reached goal
+        loser_objs = list(filter(lambda l: l if not l.winner else None, self.objs))
+        if len(loser_objs) - 1 < self.GP_INDEX:
+            self.generation += 1
+            self.show_info()
+            return False
+
+        return True
+
+    def show_info(self):
+        print(f"GENERATION: {self.generation}")
+        print(f"TIME: {(dt.now() - self.death_time).total_seconds()}")
+        print(f"POPULATION: {len(self.objs)}")
+        print(f"Good points count: {len(self.good_points)}, Bad points count: {len(self.bad_points)}\n")
 
     def regeneration(self):
         self.generation += 1
         self.save_data()
 
-        print(f"GENERATION: {self.generation}")
-        print(f"TIME: {(dt.now() - self.death_time).total_seconds()}")
-        print(f"POPULATION: {len(self.objs)}")
-        print(f"Good points count: {len(self.good_points)}, Bad points count: {len(self.bad_points)}\n")
+        self.show_info()
 
         self.objs = [Dot(*self.start_pos) for _ in range(self.POPULATION)]
         self.death_time = dt.now()
 
     def calculate_good_points(self):
         # Find objs worthy to become good points
-        loser_objs = []
-        for obj in self.objs:
-            if not obj.winner:
-                loser_objs.append(obj)
-
+        loser_objs = list(filter(lambda l: l if not l.winner else None, self.objs))
         sorted_objs = sorted(loser_objs, key=lambda l: l.dist_to_border)
         worthy_objs = []
         for each in sorted_objs:

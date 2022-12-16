@@ -10,20 +10,21 @@ def run():
     is_running = True
 
     while is_running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                is_running = False
-
         board.clear()
 
         board.show_points(dots.good_points + dots.bad_points)
 
         board.show_points(dots.objs)
 
-        dots.move()
+        is_running = dots.move()
 
         pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                is_running = False
 
 
 if __name__ == "__main__":
     run()
+    print("Program has stopped working successfully!")
