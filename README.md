@@ -2,6 +2,8 @@
 My goal was to create AI mapping model and train it, so it could map the terrain, find deadly points and best safe point near it.
 deadly point can be anything starting from a simple wall end of the mine in the field.
 
+NOTE: this is simple AI project from scratch without tenerflow or keras.
+
 # Description
 In my model, there is Base class, where I put numbers of population of the dots and size of the terrain. in real life dots can be anything, it can be a drone,
 which scans the terrain or something else. 
